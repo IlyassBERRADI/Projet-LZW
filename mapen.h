@@ -8,6 +8,9 @@
 #include <stdlib.h>
 #include "link.h"
 
+#define CLEAR_CODE 256
+#define END_CODE 257
+
 typedef struct _mapen *Mapen;
 
 /**
@@ -22,7 +25,8 @@ void mapen_free(Mapen map);
 
 /**
  * @brief Get the code for given str.
- * @param code The code corresponding to the str parameter if it exist in the map.
+ * @param code The code corresponding to the str parameter,
+ * and don't modify it if str does note exist.
  * @return int Return 1 if str is in the map, 0 if not.
  */
 int mapen_get_code(Mapen map, const char* str, uint32_t* code);

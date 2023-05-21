@@ -5,7 +5,39 @@
 #include "mapde.h"
 
 void encode(FILE* src, FILE* dest) {
-    printf("Encoding is not yet implemented.\n");
+    /* Init */
+    Mapen map = mapen_create();
+    char c;
+    char str[5] = { '\0' };
+    int size = 0;
+    uint32_t code;
+    fprintf(dest, "%u ", CLEAR_CODE);
+
+    /* Read file */
+    while (!feof(src)) {
+        if (mapen_get_code(map, str, &code)) {
+            /* Continue reading file */
+            c = fgetc(src);
+            /* Add char to string */
+            str[size++] = c;
+            str[size] = '\0';
+        } else {
+            /* The current str has no code,
+            write of previous valid code and creation of a new code */
+            fprintf(dest, "%u ", code);
+            mapen_add_str(map, str);
+            /* str is now equals to the last character read */
+            str[0] = str[size-1];
+            str[1] = '\0';
+            size = 1;
+        }
+    }
+    
+    /* Write last string */
+    mapen_get_code(map, str, &code);
+    if (size > 0) fprintf(dest, "%u ", code);
+    /* Close the data */
+    fprintf(dest, "%u", END_CODE);
 }
 
 void decode(FILE* src, FILE* dest) {
@@ -34,6 +66,7 @@ int main(int argc, char const *argv[]) {
     if (strcmp("-e", argv[1]) == 0) {
         /* Encode file */
         encode(src, dest);
+        printf("Encoding finished successfully.\n");
     } else if (strcmp("-d", argv[1]) == 0) {
         /* Decode file */
         decode(src, dest);

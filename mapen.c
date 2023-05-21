@@ -4,8 +4,6 @@
 #include <limits.h>
 
 #define SIZE 256
-#define CLEAR_CODE 256
-#define END_CODE 257
 
 struct _mapen {
     Link data[SIZE];
@@ -24,14 +22,11 @@ uint32_t mapen_hash(const char* str) {
     return hash % SIZE;
 }
 
-/**
- * @brief Create a new map for encoding.
- */
 Mapen mapen_create() {
     Mapen map = calloc(1, sizeof(struct _mapen));
     short i;
     char str[2] = " ";
-    for (i = 0; i < UCHAR_MAX; i++) {
+    for (i = 0; i <= UCHAR_MAX; i++) {
         str[0] = i;
         mapen_add_str(map, str);
     }
@@ -40,9 +35,6 @@ Mapen mapen_create() {
     return map;
 }
 
-/**
- * @brief Free the map.
- */
 void mapen_free(Mapen map) {
     int i;
     for (i = 0; i < SIZE; i++) {
@@ -51,11 +43,6 @@ void mapen_free(Mapen map) {
     free(map);
 }
 
-/**
- * @brief Get the code for given str.
- * @param code The code corresponding to the str parameter if it exist in the map.
- * @return int Return 1 if str is in the map, 0 if not.
- */
 int mapen_get_code(Mapen map, const char* str, uint32_t* code) {
     uint32_t hash = mapen_hash(str);
     Link link = map->data[hash];
@@ -70,10 +57,6 @@ int mapen_get_code(Mapen map, const char* str, uint32_t* code) {
     return 0;
 }
 
-/**
- * @brief Add the str to the map and create a new code for it.
- * @param str 
- */
 void mapen_add_str(Mapen map, const char* str) {
     uint32_t hash = mapen_hash(str);
     Link link = link_create(str, map->next_code++, map->data[hash]);
