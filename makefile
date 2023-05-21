@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-Wall -ansi -g
 LDFLAGS=
 
-lzw:
+lzw: link.o mapen.o mapde.o
 
 .PHONY: clean
 clean:

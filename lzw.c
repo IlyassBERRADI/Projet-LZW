@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "link.h"
 
 void encode(FILE* src, FILE* dest) {
     printf("Encoding is not yet implemented.\n");
