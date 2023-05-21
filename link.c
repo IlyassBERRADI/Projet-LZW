@@ -3,7 +3,7 @@
 #include <string.h>
 
 Link link_create(const char *str, uint32_t code, Link next) {
-    Link new = malloc(sizeof(Link));
+    Link new = malloc(sizeof(struct _link));
     new->str = malloc(sizeof(char) * (strlen(str) + 1));
     strcpy(new->str, str);
     new->code = code;
