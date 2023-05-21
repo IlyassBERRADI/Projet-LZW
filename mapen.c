@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <limits.h>
+#include "map.h"
 
 #define SIZE 256
 
@@ -22,8 +23,8 @@ uint32_t mapen_hash(const char* str) {
     return hash % SIZE;
 }
 
-Mapen mapen_create() {
-    Mapen map = calloc(1, sizeof(struct _mapen));
+Map mapen_create() {
+    Map map = calloc(1, sizeof(struct _map));
     short i;
     char str[2] = " ";
     for (i = 0; i <= UCHAR_MAX; i++) {
@@ -35,15 +36,7 @@ Mapen mapen_create() {
     return map;
 }
 
-void mapen_free(Mapen map) {
-    int i;
-    for (i = 0; i < SIZE; i++) {
-        link_free(map->data[i]);
-    }
-    free(map);
-}
-
-int mapen_get_code(Mapen map, const char* str, uint32_t* code) {
+int mapen_get_code(Map map, const char* str, uint32_t* code) {
     uint32_t hash = mapen_hash(str);
     Link link = map->data[hash];
     for (link = map->data[hash]; link != NULL; link = link->next) {
@@ -57,7 +50,7 @@ int mapen_get_code(Mapen map, const char* str, uint32_t* code) {
     return 0;
 }
 
-void mapen_add_str(Mapen map, const char* str) {
+void mapen_add_str(Map map, const char* str) {
     uint32_t hash = mapen_hash(str);
     Link link = link_create(str, map->next_code++, map->data[hash]);
     map->data[hash] = link;

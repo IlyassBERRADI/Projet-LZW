@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "map.h"
 #include "mapen.h"
 #include "mapde.h"
 
 void encode(FILE* src, FILE* dest) {
     /* Init */
-    Mapen map = mapen_create();
+    Map map = mapen_create();
     char c;
     char str[5] = { '\0' };
     int size = 0;
@@ -38,6 +39,7 @@ void encode(FILE* src, FILE* dest) {
     if (size > 0) fprintf(dest, "%u ", code);
     /* Close the data */
     fprintf(dest, "%u", END_CODE);
+    map_free(map);
 }
 
 void decode(FILE* src, FILE* dest) {

@@ -7,21 +7,17 @@
 
 #include <stdlib.h>
 #include "link.h"
-
-#define CLEAR_CODE 256
-#define END_CODE 257
-
-typedef struct _mapen *Mapen;
+#include "map.h"
 
 /**
  * @brief Create a new map for encoding.
  */
-Mapen mapen_create();
+Map mapen_create();
 
 /**
  * @brief Free the map.
  */
-void mapen_free(Mapen map);
+void mapen_free(Map map);
 
 /**
  * @brief Get the code for given str.
@@ -29,12 +25,12 @@ void mapen_free(Mapen map);
  * and don't modify it if str does note exist.
  * @return int Return 1 if str is in the map, 0 if not.
  */
-int mapen_get_code(Mapen map, const char* str, uint32_t* code);
+int mapen_get_code(Map map, const char* str, uint32_t* code);
 
 /**
  * @brief Add the str to the map and create a new code for it.
  * @param str 
  */
-void mapen_add_str(Mapen map, const char* str);
+void mapen_add_str(Map map, const char* str);
 
 #endif
