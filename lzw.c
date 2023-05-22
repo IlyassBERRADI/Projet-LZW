@@ -5,11 +5,13 @@
 #include "mapen.h"
 #include "mapde.h"
 
+#define STR_SIZE 1024
+
 void encode(FILE* src, FILE* dest) {
     /* Init */
     Map map = mapen_create();
     char c;
-    char str[5] = { '\0' };
+    char str[STR_SIZE] = { '\0' };
     int size = 0;
     uint32_t code;
     fprintf(dest, "%u ", CLEAR_CODE);
@@ -33,7 +35,7 @@ void encode(FILE* src, FILE* dest) {
             size = 1;
         }
     }
-    
+
     /* Write last string */
     mapen_get_code(map, str, &code);
     if (size > 0) fprintf(dest, "%u ", code);
@@ -42,8 +44,75 @@ void encode(FILE* src, FILE* dest) {
     map_free(map);
 }
 
+/**
+ * @brief Manage an array of two pointer to free.
+ */
+void update_trash(char* trash[], char* str) {
+    if (trash[0] != NULL) free(trash[0]);
+    trash[0] = trash[1];
+    trash[1] = str;
+}
+
+/**
+ * @brief Add to map a new string with last_str and new_char
+ */
+void add_to_map(Map map, char* last_str, char new_char) {
+    static char to_add[1024] = { '\0' };
+
+    int size = strlen(last_str);
+    strcpy(to_add, last_str);
+    to_add[size] = new_char;
+    to_add[size+1] = '\0';
+    mapde_add_str(map, to_add);
+}
+
+char* get_unknown_code(char* last_str) {
+    int size = strlen(last_str) + 2;
+    char* str = malloc(sizeof(char) * size);
+    strcpy(str, last_str);
+    str[size-2] = last_str[0];
+    str[size-1] = '\0';
+    return str;
+}
+
 void decode(FILE* src, FILE* dest) {
-    printf("Decoding is not yet implemented.\n");
+    Map map;
+    uint32_t code = 0;
+    char* last_str = NULL;
+    char* str = NULL;
+    char* trash[2] = { NULL };
+    int i;
+
+    while (1) {
+        fscanf(src, "%u", &code);
+
+        if (code == CLEAR_CODE) {
+            /* Create a new map with only default code */
+            map = mapde_create();
+            continue;
+        }
+
+        /* End of file reached*/
+        if (code == END_CODE) break;
+
+        last_str = str;
+        str = mapde_get_str(map, code);
+        if (str == NULL) {
+            /* No existing code */
+            str = get_unknown_code(last_str);
+            update_trash(trash, str);
+        }
+
+        fprintf(dest, "%s", str);
+
+        /* Add a new code */
+        if (last_str == NULL) continue;
+        add_to_map(map, last_str, str[0]);
+    }
+    map_free(map);
+    for (i = 0; i < 2; i++) {
+        if (trash[i] != NULL) free(trash[i]);
+    }
 }
 
 int main(int argc, char const *argv[]) {
@@ -72,6 +141,7 @@ int main(int argc, char const *argv[]) {
     } else if (strcmp("-d", argv[1]) == 0) {
         /* Decode file */
         decode(src, dest);
+        printf("Decoding finished successfully.\n");
     } else {
         printf("First argument must be either \"-e\" or \"-d\".\n");
         fclose(src);

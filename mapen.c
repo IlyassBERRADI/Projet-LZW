@@ -2,12 +2,9 @@
 
 #include <string.h>
 #include <limits.h>
-#include "map.h"
-
-#define SIZE 256
 
 struct _mapen {
-    Link data[SIZE];
+    Link data[MAP_SIZE];
     uint32_t next_code;
 };
 
@@ -20,7 +17,7 @@ uint32_t mapen_hash(const char* str) {
     for (i = 0; str[i] != '\0'; i++) {
         hash = hash * hash + str[i];
     }
-    return hash % SIZE;
+    return hash % MAP_SIZE;
 }
 
 Map mapen_create() {

@@ -15,11 +15,6 @@
 Map mapen_create();
 
 /**
- * @brief Free the map.
- */
-void mapen_free(Map map);
-
-/**
  * @brief Get the code for given str.
  * @param code The code corresponding to the str parameter,
  * and don't modify it if str does note exist.
