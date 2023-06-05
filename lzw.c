@@ -8,11 +8,14 @@
 
 #define STR_SIZE 10000
 
+/**
+ * @brief Encode a given src file in dest file using LZW algorithm.
+ */
 void encode(FILE* src, FILE* dest) {
     /* Init */
     Map map = mapen_create();
     char c;
-    Str str = str_create_empty(STR_SIZE);
+    Str str = str_create(STR_SIZE);
     int max_size = 0;
     int count_pass = 0;
     int count_add = 0;
@@ -71,7 +74,7 @@ void update_trash(Str trash[], Str str) {
 }
 
 /**
- * @brief Add to map a new string with last_str and new_char
+ * @brief Add to map a new string with last_str and new_char.
  */
 void add_to_map(Map map, Str last_str, char new_char) {
     Str to_add = str_copy(last_str, last_str->size + 1);
@@ -89,7 +92,11 @@ Str get_unknown_code(Str last_str) {
     return str;
 }
 
+/**
+ * @brief Decode src file into dest file using LZW algorithm.
+ */
 void decode(FILE* src, FILE* dest) {
+    /* Init */
     Map map;
     uint32_t code = 0;
     Str last_str = NULL;

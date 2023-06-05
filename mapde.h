@@ -15,7 +15,7 @@
 Map mapde_create();
 
 /**
- * @brief Get the str for given code.
+ * @brief Get the string for given code.
  * @return Return the string attached to the code,
  * or NULL if the code does not exist.
  */
@@ -23,7 +23,7 @@ Str mapde_get_str(Map map, uint32_t code);
 
 /**
  * @brief Add the str to the map and create a new code for it.
- * @param str 
+ * @param str A copy of this value will be added to the map.
  */
 void mapde_add_str(Map map, const Str str);
 

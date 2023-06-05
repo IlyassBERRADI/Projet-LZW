@@ -19,7 +19,7 @@ typedef struct _link {
  * @param str A copy will be created in the new link.
  * @return Link 
  */
-Link link_create(const Str str, uint32_t code, Link link);
+Link link_create(const Str str, uint32_t code, Link next);
 
 /**
  * @brief Free a link and all childs in link->next.

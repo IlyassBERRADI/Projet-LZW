@@ -3,11 +3,6 @@
 #include <string.h>
 #include <limits.h>
 
-struct _mapen {
-    Link data[MAP_SIZE];
-    uint32_t next_code;
-};
-
 /**
  * @brief Get the hash value of the given str.
  */
@@ -23,7 +18,7 @@ uint32_t mapen_hash(const Str str) {
 Map mapen_create() {
     Map map = calloc(1, sizeof(struct _map));
     short i;
-    Str str = str_create_empty(1);
+    Str str = str_create(1);
     for (i = 0; i <= UCHAR_MAX; i++) {
         str_empty(str);
         str_append(str, (char)i);

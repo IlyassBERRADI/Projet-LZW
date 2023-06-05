@@ -4,40 +4,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-/**
- * @brief Allocate and create a copy of str.
- * 
- * @param str String to copy.
- * @param size Number of element to copy.
- * @param max_size Number of element to allocate.
- */
-char* str_duplicate(char* str, int size, int max_size) {
-    /* Allocate memory */
-    char* dest = malloc(sizeof(char) * max_size);
-
-    /* Copy data */
-    int i;
-    for (i = 0; i < size; i++) {
-        dest[i] = str[i];
-    }
-
-    return dest;
-}
-
-Str str_create(char* str, int size, int max_size) {
+Str str_create(int max_size) {
     Str new = malloc(sizeof(struct _str));
-    new->data = str_duplicate(str, size, max_size);
-    new->size = size;
+    new->data = malloc(sizeof(char) * max_size);
+    new->size = 0;
     new->max_size = max_size;
     return new;
 }
 
-Str str_create_empty(int max_size) {
-    return str_create("", 0, max_size);
-}
-
 Str str_copy(Str str, int max_size) {
-    return str_create(str->data, str->size, max_size);
+    Str new = str_create(max_size);
+    int i;
+    for (i = 0; i < str->size; i++) {
+        new->data[i] = str->data[i];
+    }
+    new->size = str->size;
+    return new;
 }
 
 int str_equals(Str s1, Str s2) {

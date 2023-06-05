@@ -14,7 +14,7 @@ uint32_t mapde_hash(uint32_t code) {
 Map mapde_create() {
     Map map = calloc(1, sizeof(struct _map));
     short i;
-    Str str = str_create_empty(1);
+    Str str = str_create(1);
     for (i = 0; i <= UCHAR_MAX; i++) {
         str_empty(str);
         str_append(str, (char)i);

@@ -21,8 +21,16 @@ typedef struct _map {
  */
 void map_free(Map map);
 
+/**
+ * @brief Count all elements from the map.
+ * @note Using map_next_code is faster for almost the same result,
+ * but this function also check that the map is well formed.
+ */
 int map_count(Map map);
 
+/**
+ * @brief Get the next code to add to the map.
+ */
 int map_next_code(Map map);
 
 #endif
