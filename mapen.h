@@ -17,15 +17,15 @@ Map mapen_create();
 /**
  * @brief Get the code for given str.
  * @param code The code corresponding to the str parameter,
- * and don't modify it if str does note exist.
+ * and don't modify it if str does not exist.
  * @return int Return 1 if str is in the map, 0 if not.
  */
-int mapen_get_code(Map map, const char* str, uint32_t* code);
+int mapen_get_code(Map map, const Str str, uint32_t* code);
 
 /**
  * @brief Add the str to the map and create a new code for it.
  * @param str 
  */
-void mapen_add_str(Map map, const char* str);
+void mapen_add_str(Map map, const Str str);
 
 #endif

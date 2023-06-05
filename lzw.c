@@ -4,17 +4,22 @@
 #include "map.h"
 #include "mapen.h"
 #include "mapde.h"
+#include "str.h"
 
-#define STR_SIZE 1024
+#define STR_SIZE 10000
 
 void encode(FILE* src, FILE* dest) {
     /* Init */
     Map map = mapen_create();
     char c;
-    char str[STR_SIZE] = { '\0' };
-    int size = 0;
+    Str str = str_create_empty(STR_SIZE);
+    int max_size = 0;
+    int count_pass = 0;
+    int count_add = 0;
     uint32_t code;
     fprintf(dest, "%u ", CLEAR_CODE);
+    c = fgetc(src);
+    str_append(str, c);
 
     /* Read file */
     while (!feof(src)) {
@@ -22,23 +27,35 @@ void encode(FILE* src, FILE* dest) {
             /* Continue reading file */
             c = fgetc(src);
             /* Add char to string */
-            str[size++] = c;
-            str[size] = '\0';
+            str_append(str, c);
+
+            count_pass++;
         } else {
             /* The current str has no code,
             write of previous valid code and creation of a new code */
             fprintf(dest, "%u ", code);
             mapen_add_str(map, str);
             /* str is now equals to the last character read */
-            str[0] = str[size-1];
-            str[1] = '\0';
-            size = 1;
+            str_empty(str);
+            str_append(str, c);
+
+            count_add++;
         }
+
+        if (str->size > max_size) max_size = str->size;
     }
 
     /* Write last string */
-    mapen_get_code(map, str, &code);
-    if (size > 0) fprintf(dest, "%u ", code);
+    if (str->size > 0) {
+        mapen_get_code(map, str, &code);
+        fprintf(dest, "%u ", code);
+    }
+
+    /* Show statistics */
+    printf("Maximum size of generated string in the dictionary : %d\n", max_size);
+    /*printf("Number of element in the dictionary : %d\n", map_count(map));*/
+    printf("Number of element in the dictionary : %d\n", map_count(map));
+
     /* Close the data */
     fprintf(dest, "%u", END_CODE);
     map_free(map);
@@ -47,8 +64,8 @@ void encode(FILE* src, FILE* dest) {
 /**
  * @brief Manage an array of two pointer to free.
  */
-void update_trash(char* trash[], char* str) {
-    if (trash[0] != NULL) free(trash[0]);
+void update_trash(Str trash[], Str str) {
+    if (trash[0] != NULL) str_free(trash[0]);
     trash[0] = trash[1];
     trash[1] = str;
 }
@@ -56,31 +73,28 @@ void update_trash(char* trash[], char* str) {
 /**
  * @brief Add to map a new string with last_str and new_char
  */
-void add_to_map(Map map, char* last_str, char new_char) {
-    static char to_add[1024] = { '\0' };
-
-    int size = strlen(last_str);
-    strcpy(to_add, last_str);
-    to_add[size] = new_char;
-    to_add[size+1] = '\0';
+void add_to_map(Map map, Str last_str, char new_char) {
+    Str to_add = str_copy(last_str, last_str->size + 1);
+    str_append(to_add, new_char);
     mapde_add_str(map, to_add);
 }
 
-char* get_unknown_code(char* last_str) {
-    int size = strlen(last_str) + 2;
-    char* str = malloc(sizeof(char) * size);
-    strcpy(str, last_str);
-    str[size-2] = last_str[0];
-    str[size-1] = '\0';
+/**
+ * @brief Generate the text corresponding to an unknown code.
+ * @param last_str String of the last code read.
+ */
+Str get_unknown_code(Str last_str) {
+    Str str = str_copy(last_str, last_str->size + 1);
+    str_append(str, last_str->data[0]);
     return str;
 }
 
 void decode(FILE* src, FILE* dest) {
     Map map;
     uint32_t code = 0;
-    char* last_str = NULL;
-    char* str = NULL;
-    char* trash[2] = { NULL };
+    Str last_str = NULL;
+    Str str = NULL;
+    Str trash[2] = { NULL };
     int i;
 
     while (1) {
@@ -88,6 +102,7 @@ void decode(FILE* src, FILE* dest) {
 
         if (code == CLEAR_CODE) {
             /* Create a new map with only default code */
+            if (map != NULL) map_free(map);
             map = mapde_create();
             continue;
         }
@@ -103,12 +118,14 @@ void decode(FILE* src, FILE* dest) {
             update_trash(trash, str);
         }
 
-        fprintf(dest, "%s", str);
+        str_write(dest, str);
 
         /* Add a new code */
         if (last_str == NULL) continue;
-        add_to_map(map, last_str, str[0]);
+        add_to_map(map, last_str, str->data[0]);
     }
+
+    /* Free memory */
     map_free(map);
     for (i = 0; i < 2; i++) {
         if (trash[i] != NULL) free(trash[i]);

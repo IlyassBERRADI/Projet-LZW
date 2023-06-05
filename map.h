@@ -21,4 +21,8 @@ typedef struct _map {
  */
 void map_free(Map map);
 
+int map_count(Map map);
+
+int map_next_code(Map map);
+
 #endif
