@@ -81,6 +81,7 @@ void add_to_map(Map map, Str last_str, char new_char) {
     Str to_add = str_copy(last_str, last_str->size + 1);
     str_append(to_add, new_char);
     mapde_add_str(map, to_add);
+    str_free(to_add);
 }
 
 /**
@@ -136,7 +137,7 @@ void decode(FILE* src, FILE* dest) {
     /* Free memory */
     map_free(map);
     for (i = 0; i < 2; i++) {
-        if (trash[i] != NULL) free(trash[i]);
+        if (trash[i] != NULL) str_free(trash[i]);
     }
 }
 
