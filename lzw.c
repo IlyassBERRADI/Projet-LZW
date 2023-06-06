@@ -61,6 +61,7 @@ void encode(FILE* src, FILE* dest) {
 
     /* Close the data */
     fprintf(dest, "%u", END_CODE);
+    str_free(str);
     map_free(map);
 }
 

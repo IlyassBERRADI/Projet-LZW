@@ -26,6 +26,7 @@ Map mapen_create() {
     }
     /* Skip 2 values corresponding to CLEAR_CODE and END_CODE */
     map->next_code += 2;
+    str_free(str);
     return map;
 }
 
