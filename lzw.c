@@ -32,9 +32,6 @@ void encode(FILE* src, FILE* dest) {
     BIT_FILE *bfout = bit_begin(dest);
     char c;
     Str str = str_create(STR_SIZE);
-    int max_size = 0;
-    int count_pass = 0;
-    int count_add = 0;
     uint32_t code;
     /*fprintf(dest, "%u ", CLEAR_CODE);*/
     bit_put(bfout, CLEAR_CODE, current_code_size);
@@ -49,7 +46,6 @@ void encode(FILE* src, FILE* dest) {
             /* Add char to string */
             str_append(str, c);
 
-            count_pass++;
         } else {
             /* The current str has no code,
             write of previous valid code and creation of a new code */
@@ -78,11 +74,7 @@ void encode(FILE* src, FILE* dest) {
             /* str is now equals to the last character read */
             str_empty(str);
             str_append(str, c);
-
-            count_add++;
         }
-
-        if (str->size > max_size) max_size = str->size;
     }
 
     /* Write last string */
@@ -92,13 +84,7 @@ void encode(FILE* src, FILE* dest) {
         bit_put(bfout, code, current_code_size);
     }
 
-    /* Show statistics */
-    printf("Maximum size of generated string in the dictionary : %d\n", max_size);
-    /*printf("Number of element in the dictionary : %d\n", map_count(map));*/
-    printf("Number of element in the dictionary : %d\n", map_count(map));
-
     /* Close the data */
-    /*fprintf(dest, "%u", END_CODE);*/
     bit_put(bfout, END_CODE, current_code_size);
     bit_end(bfout);
     str_free(str);

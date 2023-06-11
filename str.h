@@ -1,3 +1,7 @@
+/**
+ * @file str.h
+ * @brief Allow management of character array containing '\0'.
+ */
 #ifndef __STR_H__
 #define __STR_H__
 

@@ -1,3 +1,7 @@
+/**
+ * @file link.h
+ * @brief A link inside a map.
+ */
 #ifndef __LINK_H__
 #define __LINK_H__
 
