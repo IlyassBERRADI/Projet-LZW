@@ -47,8 +47,12 @@ void str_empty(Str str) {
 }
 
 void str_free(Str str) {
-    free(str->data);
+    char* trash=str->data;
+    
+    str->data=NULL;
+    free(trash);
     free(str);
+    
 }
 
 void str_write(FILE* file, Str str) {

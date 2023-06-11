@@ -5,25 +5,42 @@
 #include "mapen.h"
 #include "mapde.h"
 #include "str.h"
+#include "bit_io.h"
 
 #define STR_SIZE 10000
+#define BITS 9
+
+int power_number(int a, int b){
+    int res=1;
+    for (size_t i = 0; i < b; i++)
+    {
+        res*=a;
+    }
+    return res;
+}
+
 
 /**
  * @brief Encode a given src file in dest file using LZW algorithm.
  */
 void encode(FILE* src, FILE* dest) {
     /* Init */
+    int max_code_size=12;
+    int min_code_size=8;
+    int current_code_size=min_code_size+1;
     Map map = mapen_create();
+    BIT_FILE *bfout = bit_begin(dest);
     char c;
     Str str = str_create(STR_SIZE);
     int max_size = 0;
     int count_pass = 0;
     int count_add = 0;
     uint32_t code;
-    fprintf(dest, "%u ", CLEAR_CODE);
+    /*fprintf(dest, "%u ", CLEAR_CODE);*/
+    bit_put(bfout, CLEAR_CODE, current_code_size);
     c = fgetc(src);
     str_append(str, c);
-
+    
     /* Read file */
     while (!feof(src)) {
         if (mapen_get_code(map, str, &code)) {
@@ -36,8 +53,28 @@ void encode(FILE* src, FILE* dest) {
         } else {
             /* The current str has no code,
             write of previous valid code and creation of a new code */
-            fprintf(dest, "%u ", code);
-            mapen_add_str(map, str);
+            /*fprintf(dest, "%u ", code);*/
+
+            bit_put(bfout, code, current_code_size);
+            if (!(map->next_code==power_number(2, current_code_size) &&
+            current_code_size==max_code_size))
+            {
+                mapen_add_str(map, str);
+                if (map->next_code==power_number(2, current_code_size)+1)
+                {
+                    current_code_size++;
+                }
+                
+            }
+            else
+            {
+                bit_put(bfout, CLEAR_CODE, current_code_size);
+                current_code_size=min_code_size+1;
+                map_free(map);
+                map=mapen_create();
+                map->next_code=258;
+            }
+            
             /* str is now equals to the last character read */
             str_empty(str);
             str_append(str, c);
@@ -51,7 +88,8 @@ void encode(FILE* src, FILE* dest) {
     /* Write last string */
     if (str->size > 0) {
         mapen_get_code(map, str, &code);
-        fprintf(dest, "%u ", code);
+        /*fprintf(dest, "%u ", code);*/
+        bit_put(bfout, code, current_code_size);
     }
 
     /* Show statistics */
@@ -60,7 +98,9 @@ void encode(FILE* src, FILE* dest) {
     printf("Number of element in the dictionary : %d\n", map_count(map));
 
     /* Close the data */
-    fprintf(dest, "%u", END_CODE);
+    /*fprintf(dest, "%u", END_CODE);*/
+    bit_put(bfout, END_CODE, current_code_size);
+    bit_end(bfout);
     str_free(str);
     map_free(map);
 }
@@ -99,28 +139,41 @@ Str get_unknown_code(Str last_str) {
  */
 void decode(FILE* src, FILE* dest) {
     /* Init */
-    Map map;
+    Map map=NULL;
+    BIT_FILE *bfin = bit_begin(src);
     uint32_t code = 0;
     Str last_str = NULL;
     Str str = NULL;
     Str trash[2] = { NULL };
     int i;
-
+    int max_code_size=12;
+    int min_code_size=8;
+    int current_code_size=min_code_size+1;
     while (1) {
-        fscanf(src, "%u", &code);
-
+        /*fscanf(src, "%u", &code);*/
+        bit_get(bfin, &code, current_code_size);
         if (code == CLEAR_CODE) {
             /* Create a new map with only default code */
-            if (map != NULL) map_free(map);
+            if (map != NULL) {
+                map_free(map);
+            }
             map = mapde_create();
+            current_code_size=min_code_size+1;
+            last_str = NULL;
+            str = NULL;
             continue;
         }
-
+        
         /* End of file reached*/
-        if (code == END_CODE) break;
-
+        if (code == END_CODE) {
+            break;
+        }
         last_str = str;
+        
+        
         str = mapde_get_str(map, code);
+        
+        
         if (str == NULL) {
             /* No existing code */
             str = get_unknown_code(last_str);
@@ -130,8 +183,17 @@ void decode(FILE* src, FILE* dest) {
         str_write(dest, str);
 
         /* Add a new code */
-        if (last_str == NULL) continue;
+        if (last_str == NULL){
+            continue;
+        } 
         add_to_map(map, last_str, str->data[0]);
+        if (map->next_code==power_number(2, current_code_size) &&
+        current_code_size<max_code_size)
+        {
+            current_code_size++;
+        }
+        
+        
     }
 
     /* Free memory */
@@ -139,6 +201,7 @@ void decode(FILE* src, FILE* dest) {
     for (i = 0; i < 2; i++) {
         if (trash[i] != NULL) str_free(trash[i]);
     }
+    bit_end(bfin);
 }
 
 int main(int argc, char const *argv[]) {

@@ -28,6 +28,8 @@ Map mapde_create() {
 
 Str mapde_get_str(Map map, uint32_t code) {
     uint32_t hash = mapde_hash(code);
+    //printf("aaaa\n");
+    //printf("hash=%u\n", hash);
     Link link = map->data[hash];
     for (link = map->data[hash]; link != NULL; link = link->next) {
         if (link->code == code) {
